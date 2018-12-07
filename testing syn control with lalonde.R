@@ -24,23 +24,31 @@ which(foo$treat == 0)
 cbind(rr$index.treated,rr$index.control)
 
 foo1 <- rbind(foo[1,],foo[221,],foo[364,],foo[412,])
-foo1 <- foo1[rep(seq_len(nrow(foo1)), each=2),]
 
-dummy_time <- c(1,2,1,2,1,2,1,2)
-cbind(foo1,dummy_time)
-foo1$data_id <- rownames(foo1)
+dummy_data_id <- as.character(c(1,1,221,221,364,364,412,412))
+dummy_time <- c(1,2,1,2,1,2,1,2) #dummy time units
+dummy_name <- as.numeric(c(1,1,2,2,3,3,4,4)) #dummy unts
+
+foo1 <- cbind(dummy_data_id, dummy_name,foo1,dummy_time)
+
+
+
+foo1$data_id <- as.character(rownames(foo1)) #id.nums NAMES
 foo1
 
+typeof(foo1$dummy_data_id)
+
+
 dataprep.out <-
-  dataprep(predictors = c("age","education") ,
+  dataprep(foo = foo1,
+           predictors = c("age","education") ,
            predictors.op = "mean" ,
            time.predictors.prior = 1,
-           ),
            dependent = "re78",
-           unit.variable = "data_id",
+           unit.variable = "dummy_name",
            unit.names.variable = "data_id",
-           time.variable = "year",
+           time.variable = "dummy_time",
            treatment.identifier = 1,
-           controls.identifier = 3,5,7,
+           controls.identifier = 2:4,
            time.optimize.ssr = 1,
   )
