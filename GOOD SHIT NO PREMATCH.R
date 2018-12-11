@@ -43,10 +43,23 @@ synth.tables <- synth.tab(
   synth.res = synth.out
 ) 
 
-# results tables:
+#Create matrix of weights, one for each column
 print(synth.tables)
+weights_per_cunit = synth.tables$tab.w["w.weights"]
+weights = matrix(weights_per_cunit[rep(1:nrow(weights_per_cunit), each=ncol(foo1)),], 
+                 nrow=nrow(weights_per_cunit), ncol = ncol(foo1), byrow = T)
+weights
+foo1
+typeof(foo1[1,2])
+#foo1_covariates = foo1[which(typeof(foo1)!="character")]
+#foo1_covariates = foo1[,c(-1, ncol(foo1))]
+foo1_covariates = foo1[,-1]
+foo1_covariates
 
-foo[186,]*0.496 + foo[188,]*0.504
+
+weights*foo1_covariates
+
+test = foo[186,]*0.496 
 
 
 
