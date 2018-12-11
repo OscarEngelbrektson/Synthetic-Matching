@@ -52,12 +52,11 @@ weights_per_cunit = synth.tables$tab.w["w.weights"]
 weights = matrix(weights_per_cunit[rep(1:nrow(weights_per_cunit), each=ncol(foo_covariates)),], 
                  nrow=nrow(weights_per_cunit), ncol = ncol(foo_covariates), byrow = T)
 
-summed_weights = colSums(weights) #
-summed_weights #adds to 1 for each - works well
+summed_weights = colSums(weights)#Check weights per column sum to 1
+summed_weights #adds to 0.999 for each - can we improve this rounding error?
 
-dim(foo1_covariates)
-dim(weights)
+dim(foo1_covariates) == dim(weights) #Check dimensions match
 
-weighted_averages = weights*foo1_covariates[,-ncol(foo1_covariates)]  #Remove "name" to allow multiplication
-synthetic_control = colSums(weighted_averages)
-synthetic_control
+weighted_averages = weights*foo1_covariates  #Mutliply datasets to get weighted averages
+synthetic_control = colSums(weighted_averages) #sum columns to generate synthetic control
+synthetic_control #We know have a synthetic control. Bitches!
