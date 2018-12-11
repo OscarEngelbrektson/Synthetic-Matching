@@ -43,23 +43,21 @@ synth.tables <- synth.tab(
   synth.res = synth.out
 ) 
 
+#Take units used as potential controls
+#Remove "character"-type colums to allow multiplication
+foo_covariates = foo[186:190,-c(1, ncol(foo1))]
+
 #Create matrix of weights, one for each column
-print(synth.tables)
 weights_per_cunit = synth.tables$tab.w["w.weights"]
-weights = matrix(weights_per_cunit[rep(1:nrow(weights_per_cunit), each=ncol(foo1)),], 
-                 nrow=nrow(weights_per_cunit), ncol = ncol(foo1), byrow = T)
-weights
-foo1
-typeof(foo1[1,2])
-#foo1_covariates = foo1[which(typeof(foo1)!="character")]
-#foo1_covariates = foo1[,c(-1, ncol(foo1))]
-foo1_covariates = foo1[,-1]
-foo1_covariates
+weights = matrix(weights_per_cunit[rep(1:nrow(weights_per_cunit), each=ncol(foo_covariates)),], 
+                 nrow=nrow(weights_per_cunit), ncol = ncol(foo_covariates), byrow = T)
 
+summed_weights = colSums(weights) #
+summed_weights #adds to 1 for each - works well
 
-weights*foo1_covariates
+dim(foo1_covariates)
+dim(weights)
 
-test = foo[186,]*0.496 
-
-
-
+weighted_averages = weights*foo1_covariates[,-ncol(foo1_covariates)]  #Remove "name" to allow multiplication
+synthetic_control = colSums(weighted_averages)
+synthetic_control
