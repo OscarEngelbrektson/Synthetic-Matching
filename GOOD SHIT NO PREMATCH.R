@@ -1,49 +1,21 @@
-library(Synth)
-data("synth.data")
-View(synth.data)
-
-foo <- read.dta("nsw_dw.dta")
-
-foo
-foo1 <- rbind(foo[1,],foo[1,],foo[186:190,],foo[186:190,])
-
-unit_num <- c(1,1,186,186,187,187,188,188,189,189,190,190)
-year <- c(1974,1975,1974,1975,1974,1975,1974,1975,1974,1975,1974,1975) #dummy time units
-name <- c("treat1","treat1","control1","control1","control2","control2","control3","control3","control4","control4","control5","control5") #dummy unts
-
-foo1 <- cbind(foo1,unit_num, year,name)
-foo1
-
-foo1$name <- as.character(foo1$name)
-foo1$unit_num <- as.numeric(foo1$unit_num)
-
-foo1
-
-dataprep.out <-
-  dataprep(foo = foo1,
-           predictors = c("age","education") ,
-           predictors.op = "mean",
-           time.predictors.prior = c(1974:1975),
-           dependent = "re78",
-           unit.variable = "unit_num",
-           unit.names.variable = "name",
-           time.variable = "year",
-           treatment.identifier = 1,
-           controls.identifier = 186:190,
-           time.optimize.ssr = c(1974:1975)
-  )
-
-###################################################
-synth.out <- synth(data.prep.obj = dataprep.out,
-                   method = "BFGS")
-
-# Get result tables
-synth.tables <- synth.tab(
-  dataprep.res = dataprep.out,
-  synth.res = synth.out
-) 
+library(Matching)
+data("lalonde")
+attach(lalonde)
 
 library(rgenoud)
+
+Y = lalonde$re78
+
+Tr = lalonde$treat
+
+X <- cbind(age, educ, black, hisp, married, nodegr, re74, re75, u74, u75)
+BalanceMatrix <- cbind(age, I(age^2), educ, I(educ^2), black, hisp,
+                       + married, nodegr, re74, I(re74^2), re75, I(re75^2), u74, u75,
+                       + I(re74 * re75), I(age * nodegr), I(educ * re74), I(educ * re75))
+
+
+
+
 
 fitness_func = function(w1,w2,w3,w4,w5){
   loss = (treat[1,] - (w1*control1[1,] + w2*control2[1,] + w3*control3[1,] + w4*control4[1,] + w5*control5[1,]))^2
