@@ -43,6 +43,16 @@ synth.tables <- synth.tab(
   synth.res = synth.out
 ) 
 
+library(rgenoud)
+
+fitness_func = function(w1,w2,w3,w4,w5){
+  loss = (treat[1,] - (w1*control1[1,] + w2*control2[1,] + w3*control3[1,] + w4*control4[1,] + w5*control5[1,]))^2
+  return(loss)
+}
+
+genoud(fitness_func, 4, domains = , boundary.enforcement = 1)
+
+
 #Take units used as potential controls
 #Remove "character"-type colums to allow multiplication
 foo_covariates = foo[186:190,-c(1, ncol(foo1))]
