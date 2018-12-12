@@ -13,9 +13,11 @@ BalanceMatrix <- cbind(age, I(age^2), educ, I(educ^2), black, hisp,
                        + married, nodegr, re74, I(re74^2), re75, I(re75^2), u74, u75,
                        + I(re74 * re75), I(age * nodegr), I(educ * re74), I(educ * re75))
 
+genout <- GenMatch(Tr = Tr, X = X, BalanceMatrix = BalanceMatrix,
+                   pop.size = 1000, int.seed = 3818, unif.seed = 3527)
 
 
-
+mout = Match(Y = Y, Tr = Tr, X = X, Weight.matrix = genout)
 
 fitness_func = function(w1,w2,w3,w4,w5){
   loss = (treat[1,] - (w1*control1[1,] + w2*control2[1,] + w3*control3[1,] + w4*control4[1,] + w5*control5[1,]))^2
