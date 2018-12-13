@@ -21,26 +21,41 @@ mout = Match(Tr = Tr, X = X, M = 5, replace = TRUE, ties = FALSE, Weight.matrix 
 summary(mout)
 mout$index.treated[1:10]
 mout$index.control[1:10]
+length(mout$index.treated)
 
-controls <- lalonde[mout$index.control[1:5],]
-treat <- lalonde[mout$index.treated[1],]
-
-
-fitness_func = function(w){
-  loss = (treat[1,] - (w[1]*controls[1,] + w2*controls[2,] + w3*controls[3,] + w4*controls[4,] + w5*controls[5,]))^2
-  loss_squared <- loss*loss
-   return(sum(loss_squared))}
-
-fitness_func = function(w){
-  loss = treat[,c(1:11)] - (w[1]*controls[1,c(1:11)] + w[2]*controls[2,c(1:11)] + w[3]*controls[3,c(1:11)] + w[4]*controls[4,c(1:11)] + w[5]*controls[5,c(1:11)])
-  loss_squared <- loss*loss
-  return(sum(loss_squared))
+for (i in 1:length(mout$index.treated)){
+  treat <- lalonde[mout$index.treated[i],]
+  controls <- lalonde[mout$index.control[1+5*(i-1):i*5],]
+  
+  fitness_func = function(w){
+    loss = treat[,c(1:11)] - (w[1]*controls[1,c(1:11)] + w[2]*controls[2,c(1:11)] + w[3]*controls[3,c(1:11)] + w[4]*controls[4,c(1:11)] + w[5]*controls[5,c(1:11)])
+    loss_squared <- loss*loss
+    return(sum(loss_squared))
+  }
+  
+  domain_matrix <- cbind(rep(0,5),rep(1,5))
+  genoud <- genoud(fitness_func, nvars = 5, Domains = domain_matrix, boundary.enforcement = 2,
+                   pop.size = 30,
+                   wait.generations = 5, hard.generation.limit = 20)
+  
+  synthcontrol <- genoud$par[1]*controls[1,] + genoud$par[2]*controls[2,] + genoud$par[3]*controls[3,] + genoud$par[4]*controls[4,] + genoud$par[5]*controls[5,]
+  
+  
 }
 
-domain_matrix <- cbind(rep(0,5),rep(1,5))
-genoud <- genoud(fitness_func, nvars = 5, Domains = domain_matrix, boundary.enforcement = 2,
-       pop.size = 30,
-       wait.generations = 5, hard.generation.limit = 20,)
+
+
+normalcontrol <- controls[1,]*0.20 + controls[2,]*0.20 +controls[3,]*0.20 +controls[4,]*0.20 +controls[5,]*0.20
+
+synthcontrol
+normalcontrol
+treat
+
+t.test(treat,synthcontrol)
+t.test(treat,normalcontrol)
+
+
+
 
 synth <- matrix(nrow = 5, ncol = 12)
 for (i in 1:5) {
