@@ -26,4 +26,4 @@ MatchBalance(Tr ~ age + I(age^2) + educ + I(educ^2) + black + hisp +
                + married + nodegr + re74 + I(re74^2) + re75 + I(re75^2) + u74 + u75 +
                + I(re74 * re75) + I(age * nodegr) + I(educ * re74) + I(educ * re75),
               data = lalonde, match.out = mout, nboots = 1000)
-
+mout$est
