@@ -65,7 +65,34 @@ for (i in 1:length(mout$index.treated)){
   synthetic.controls[i, ] <- this_control
   
 }
+
 head(synthetic.controls,5)
 
-saveRDS(synthetic.controls,"LalondeSyntheticControls")
+saveRDS(synthetic.controls,"LalondeSyntheticControls.rda")
+
+synths = readRDS("LalondeSyntheticControls.rda")
+View(synths)
+
+TreatedLalonde = subset(lalonde, lalonde$treat == 1)
+
+colnames(synths) = colnames(lalonde)
+SynthLalonde = rbind(TreatedLalonde, synths)
+
+SynthLalonde = subset(SynthLalonde, is.na)
+is.na(SynthLalonde)
+
+Tr = SynthLalonde$treat
+#attach(SynthLalonde)
+X <- cbind(SynthLalonde$age, SynthLalonde$educ, SynthLalonde$black, 
+           SynthLalonde$hisp, SynthLalonde$married, SynthLalonde$nodegr, 
+           SynthLalonde$re74, SynthLalonde$re75, SynthLalonde$u74, SynthLalonde$u75)
+
+
+mout = Match(Tr = Tr, X = X, M = 1, replace = F, ties = FALSE)
+
+MatchBalance(Tr ~ age + I(age^2) + educ + I(educ^2) + black + hisp +
+               + married + nodegr + re74 + I(re74^2) + re75 + I(re75^2) + u74 + u75 +
+               + I(re74 * re75) + I(age * nodegr) + I(educ * re74) + I(educ * re75),
+             data = SynthLalonde, match.out = mout, nboots = 1000)
+mout$est
 
