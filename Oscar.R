@@ -13,8 +13,11 @@ BalanceMatrix <- cbind(age, I(age^2), educ, I(educ^2), black, hisp,
                        + married, nodegr, re74, I(re74^2), re75, I(re75^2), u74, u75,
                        + I(re74 * re75), I(age * nodegr), I(educ * re74), I(educ * re75))
 
-genout <- GenMatch(Tr = Tr, X = X, BalanceMatrix = BalanceMatrix,
-                   pop.size = 100, int.seed = 3818, unif.seed = 3527)
+#genout <- GenMatch(Tr = Tr, X = X, BalanceMatrix = BalanceMatrix,
+ #                  pop.size = 100, int.seed = 3818, unif.seed = 3527)
+
+genout = readRDS("GeneticMatchingDiamond.rda")
+
 
 mout = Match(Tr = Tr, X = X, M = 5, replace = TRUE, ties = FALSE, Weight.matrix = genout)
 
@@ -23,9 +26,15 @@ mout$index.treated[1:10]
 mout$index.control[1:10]
 length(mout$index.treated)
 
+
+synthetic.controls <- data.frame(matrix(NA, nrow = max(mout$index.treated), ncol = ncol(lalonde)))
+head(synthetic.controls)
+
 for (i in 1:length(mout$index.treated)){
   treat <- lalonde[mout$index.treated[i],]
-  controls <- lalonde[mout$index.control[1+5*(i-1):i*5],]
+  controls <- lalonde[mout$index.control[(1+5*(i-1)):(i*5)],]
+  print(treat)
+  print(controls)
   
   fitness_func = function(w){
     loss = treat[,c(1:11)] - (w[1]*controls[1,c(1:11)] + w[2]*controls[2,c(1:11)] + w[3]*controls[3,c(1:11)] + w[4]*controls[4,c(1:11)] + w[5]*controls[5,c(1:11)])
@@ -36,13 +45,21 @@ for (i in 1:length(mout$index.treated)){
   domain_matrix <- cbind(rep(0,5),rep(1,5))
   genoud <- genoud(fitness_func, nvars = 5, Domains = domain_matrix, boundary.enforcement = 2,
                    pop.size = 30,
-                   wait.generations = 5, hard.generation.limit = 20)
+                   wait.generations = 5, 
+                   hard.generation.limit = 20,
+                   gradient.check = FALSE, print.level=0)
   
-  synthcontrol <- genoud$par[1]*controls[1,] + genoud$par[2]*controls[2,] + genoud$par[3]*controls[3,] + genoud$par[4]*controls[4,] + genoud$par[5]*controls[5,]
+  this_control <- genoud$par[1]*controls[1,] + 
+    genoud$par[2]*controls[2,] + 
+    genoud$par[3]*controls[3,] + 
+    genoud$par[4]*controls[4,] + 
+    genoud$par[5]*controls[5,]
+  print(this_control)
   
+  synthetic.controls[i, ] <- this_control
   
 }
-
+head(synthcontrol)
 
 
 normalcontrol <- controls[1,]*0.20 + controls[2,]*0.20 +controls[3,]*0.20 +controls[4,]*0.20 +controls[5,]*0.20
